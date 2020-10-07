@@ -26,6 +26,8 @@
     "@clr/icons": "^4.0.3",
     "@clr/ui": "4.0.3",
     "@webcomponents/webcomponentsjs": "^2.0.0",
+    "bind-observable": "^1.0.3",
+    "lodash": "^4.17.20",
     "rxjs": "~6.6.0",
     "tslib": "^2.0.0",
     "zone.js": "~0.10.2"

@@ -2,8 +2,12 @@ import {AfterViewInit, ChangeDetectorRef, Component, Inject, NgZone, OnDestroy, 
 import {isPlatformBrowser} from '@angular/common';
 import * as am4core from '@amcharts/amcharts4/core';
 import * as am4maps from '@amcharts/amcharts4/maps';
-import am4geodata_worldLow from '@amcharts/amcharts4-geodata/worldLow';
+import {MapPolygon} from '@amcharts/amcharts4/maps';
+import am4geodata_worldLow from '@amcharts/amcharts4-geodata/worldHigh';
 import am4themes_animated from '@amcharts/amcharts4/themes/animated';
+import {MenuItem} from './menuItem';
+import {MenuType} from './menuType';
+import {CountryService} from '../services/country.service';
 
 @Component({
   selector: 'app-map',
@@ -13,12 +17,33 @@ import am4themes_animated from '@amcharts/amcharts4/themes/animated';
 export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
   private chart: am4maps.MapChart;
 
+  modal = false;
   menu = false;
-  menuContext: any;
+  menuItems: MenuItem[] = [
+    {
+      name: 'İhracat Yap',
+      icon: 'factory',
+      type: MenuType.EXPORT
+    }, {
+      name: 'İthalat Yap',
+      icon: 'store',
+      type: MenuType.IMPORT
+    }, {
+      name: 'Not Ekle',
+      icon: 'highlighter',
+      type: MenuType.NOTE
+    }, {
+      name: 'Bilgileri Sil',
+      icon: 'trash',
+      type: MenuType.DELETE
+    },
+  ];
+  target: MapPolygon;
+  note: string;
   x: string;
   y: string;
 
-  constructor(@Inject(PLATFORM_ID) private platformId, private zone: NgZone, private chgRef: ChangeDetectorRef) {
+  constructor(@Inject(PLATFORM_ID) private platformId, private zone: NgZone, private chgRef: ChangeDetectorRef, private countryService: CountryService) {
   }
 
   // Run the function only in the browser
@@ -47,6 +72,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
         this.menu = false;
         this.chgRef.detectChanges();
       });
+
       const polygonSeries = chart.series.push(new am4maps.MapPolygonSeries());
       chart.smallMap.series.push(polygonSeries);
       polygonSeries.useGeodata = true;
@@ -59,6 +85,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
       polygonTemplate.nonScalingStroke = true;
       polygonTemplate.strokeOpacity = 0.5;
       polygonTemplate.contextMenuDisabled = true;
+      polygonTemplate.wheelable = true;
       polygonTemplate.fill = chart.colors.getIndex(0);
       let lastSelected;
 
@@ -71,24 +98,43 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
           lastSelected = ev.target;
         }
       }, this);
+
+      polygonTemplate.events.on('over', ev => {
+        const {id} = ev.target.dataItem.dataContext as any;
+        const {type} = this.countryService.countries[id];
+        if (type) {
+        } else {
+          ev.target.fill = chart.colors.getIndex(2);
+        }
+      }, this);
+      polygonTemplate.events.on('out', ev => {
+        const {id} = ev.target.dataItem.dataContext as any;
+        const {type} = this.countryService.countries[id];
+        console.log(type);
+        if (type) {
+        } else {
+          ev.target.fill = chart.colors.getIndex(0);
+        }
+      }, this);
+
       polygonTemplate.events.on('rightclick', (ev) => {
         this.menu = true;
-        this.menuContext = ev.target.dataItem.dataContext;
+        this.target = ev.target;
         // @ts-ignore
         const {clientX, clientY} = ev.event;
         this.x = `${clientX}px`;
         this.y = `${clientY}px`;
 
         this.chgRef.detectChanges();
-        console.log(ev, this, ev.target.dataItem.dataContext);
       }, this);
 
+      /*
+            const ss = polygonTemplate.states.create('active');
+            ss.properties.fill = chart.colors.getIndex(2);
 
-      const ss = polygonTemplate.states.create('active');
-      ss.properties.fill = chart.colors.getIndex(2);
-
-      const hs = polygonTemplate.states.create('hover');
-      hs.properties.fill = chart.colors.getIndex(4);
+            const hs = polygonTemplate.states.create('hover');
+            hs.properties.fill = chart.colors.getIndex(4);
+      */
 
 
       /*
@@ -117,7 +163,30 @@ homeButton.icon = new am4core.Sprite();
     });
   }
 
-  menuClick(e: any, context: any): void {
-    console.log(e, context);
+  menuClick(e: any, target: MapPolygon, type: MenuType): void {
+    if (target.constructor.name === 'MapPolygon') {
+      const {id} = target.dataItem.dataContext as any;
+      switch (type) {
+        case MenuType.EXPORT:
+          target.fill = am4core.color('#00ff00');
+          this.countryService.setCountryType(id, type);
+          break;
+        case MenuType.IMPORT:
+          target.fill = am4core.color('#ff0000');
+          this.countryService.setCountryType(id, type);
+          break;
+        case MenuType.NOTE:
+          this.modal = true;
+          this.countryService.setCountryNote(id, '');
+          break;
+        case MenuType.DELETE:
+          target.fill = this.chart.colors.getIndex(0);
+          this.countryService.setCountryClear(id);
+          break;
+        default:
+          break;
+      }
+    }
+    this.menu = false;
   }
 }

@@ -2,18 +2,29 @@
 {{x}} - {{y}}
 <div style="position: fixed;" [style.left]="x" [style.top]="y" *ngIf="menu">
   <clr-vertical-nav>
-    <label class="nav-header"> {{menuContext.name}} </label>
-    <a href="#" clrVerticalNavLink (click)="menuClick($event, menuContext)">
-      <clr-icon clrVerticalNavIcon shape="factory"></clr-icon>
-      İhracat Yap</a>
-    <a href="#" clrVerticalNavLink (click)="menuClick($event, menuContext)">
-      <clr-icon clrVerticalNavIcon shape="store"></clr-icon>
-      İthalat Yap</a>
-    <a href="#" clrVerticalNavLink (click)="menuClick($event, menuContext)">
-      <clr-icon clrVerticalNavIcon shape="highlighter"></clr-icon>
-      Not Ekle</a>
-    <a href="#" clrVerticalNavLink (click)="menuClick($event, menuContext)">
-      <clr-icon clrVerticalNavIcon shape="trash"></clr-icon>
-      Bilgileri Sil</a>
+    <a href="#" clrVerticalNavLink (click)="menuClick($event, target, menu.type)" *ngFor="let menu of menuItems">
+      <clr-icon clrVerticalNavIcon [attr.shape]="menu.icon"></clr-icon>
+      {{menu.name}}</a>
   </clr-vertical-nav>
 </div>
+<clr-modal [(clrModalOpen)]="modal">
+  <h3 class="modal-title">Notes</h3>
+  <div class="modal-body">
+    <form class="clr-form">
+      <div class="clr-form-control">
+        <label for="vertical-textarea-basic" class="clr-control-label">write a note to the country</label>
+        <div class="clr-control-container">
+          <div class="clr-textarea-wrapper">
+            <textarea id="vertical-textarea-basic" placeholder="Enter note here" class="clr-textarea"></textarea>
+            <clr-icon class="clr-validate-icon" shape="exclamation-circle"></clr-icon>
+          </div>
+          <span class="clr-subtext">Helper Text</span>
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-outline" (click)="modal = false">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)="modal = false">Ok</button>
+  </div>
+</clr-modal>

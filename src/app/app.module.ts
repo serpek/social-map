@@ -5,9 +5,8 @@ import {ClarityModule} from '@clr/angular';
 
 import {AppRoutingModule} from './app-routing.module';
 import {AppComponent} from './app.component';
-
-import {FacebookLoginProvider, SocialAuthModule, SocialAuthServiceConfig} from 'social-login';
 import {MapComponent} from './map/map.component';
+import {CoreModule} from './core/core.module';
 
 @NgModule({
   declarations: [
@@ -18,23 +17,10 @@ import {MapComponent} from './map/map.component';
     BrowserModule,
     BrowserAnimationsModule,
     AppRoutingModule,
-    SocialAuthModule,
+    CoreModule,
     ClarityModule
   ],
-  providers: [
-    {
-      provide: 'SocialAuthServiceConfig',
-      useValue: {
-        autoLogin: true,
-        providers: [
-          {
-            id: FacebookLoginProvider.PROVIDER_ID,
-            provider: new FacebookLoginProvider('784204875698665'),
-          }
-        ],
-      } as SocialAuthServiceConfig,
-    }
-  ],
+  providers: [],
   bootstrap: [AppComponent]
 })
 export class AppModule {

@@ -15,6 +15,20 @@
         <input id="search_input" type="text" placeholder="Search for keywords...">
       </label>
     </form>
+
+    <clr-combobox-container class="search">
+      <label for="search_input">
+        <clr-combobox placeholder="Search for keywords...">
+          <clr-options>
+            <clr-option *clrOptionItems="let item of countries; field:'country'" [clrValue]="item">
+              {{item.country}}
+            </clr-option>
+          </clr-options>
+        </clr-combobox>
+      </label>
+    </clr-combobox-container>
+
+
     <div class="header-actions" *ngIf="user">
       <a href="javascript://" class="nav-link nav-icon-text">
         <clr-icon shape="user"></clr-icon>
